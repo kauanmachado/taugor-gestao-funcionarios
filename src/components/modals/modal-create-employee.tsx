@@ -7,7 +7,7 @@ import { IEmployee } from '../../interfaces/IEmployee';
 import { useNavigate } from 'react-router-dom';
 import { PiX } from 'react-icons/pi';
 
-type Prop = {
+type DataProps = {
     handleOpen: Function
     handleClose: () => void
     open: boolean
@@ -26,10 +26,10 @@ const style = {
     bgcolor: 'background.paper',
     boxShadow: 24,
     p: 4,
-};
+}
 
 
-export const ModalCreateEmployee = ({ employee, open, handleClose, createEmployee }: Prop) => {
+export const ModalCreateEmployee = ({ employee, open, handleClose, createEmployee }: DataProps) => {
     const navigate = useNavigate()
     const confirm = () => {
         createEmployee(employee)

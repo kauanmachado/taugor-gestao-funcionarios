@@ -14,7 +14,7 @@ export const Home = () => {
                 </Link>
                 <Link to="/list-employees" className="flex items-center justify-center bg-baseBlue text-white p-4 h-[100px] shadow-lg rounded gap-2">
                     <FaListUl />
-                    Listar funcionários
+                    Funcionários
                 </Link>
                 <Logout/>
             </div>
