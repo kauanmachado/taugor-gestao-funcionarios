@@ -10,38 +10,44 @@ import { useState } from 'react';
 import { TiThMenu } from 'react-icons/ti';
 import { ModalPromoteEmployee } from '../modals/modal-promote-employee';
 import { ModalDeleteEmployee } from '../modals/modal-delete-employee';
+import { useNavigate } from 'react-router-dom';
+import { ModalUpdateContact } from '../modals/modal-update-contact';
 
 export default function Employee() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [openModal, setOpenModal] = useState(false)
   const [openModalDelete, setOpenModalDelete] = useState(false)
+  const [openModalUpdateContact, setOpenModalUpdateContact] = useState(false)
   const open = Boolean(anchorEl)
+  const navigate = useNavigate()
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null)
-  };
+  }
+  const handleClose = () => setAnchorEl(null)
 
   const handleOpenModal = () => {
     setOpenModal(true)
     handleClose()
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false)
   }
+  const handleCloseModal = () => setOpenModal(false)
+
 
   const handleOpenModalDelete = () => {
     setOpenModalDelete(true)
     handleClose()
-};
-
-const handleCloseModalDelete = () => {
-    setOpenModalDelete(false)
-};
+  }
+  const handleCloseModalUpdateContact = () => setOpenModalUpdateContact(false)
+  
+  const handleOpenModalUpdateContact = () => {
+    setOpenModalUpdateContact(true)
+    handleClose()
+  }
+  const handleCloseModalDelete = () => setOpenModalDelete(false)
+  const handleEmployeeHistory = () => {
+    navigate('/employee-history')
+    handleClose()
+  }
 
 
   return (
@@ -56,7 +62,6 @@ const handleCloseModalDelete = () => {
         <p className="text-gray-600 text-sm">Desenvolvedor Web - Setor TI</p>
       </div>
 
-      {/* Container para o botão de menu no canto direito */}
       <div className="flex items-center">
         <Button
           id="basic-button"
@@ -77,13 +82,14 @@ const handleCloseModalDelete = () => {
             'aria-labelledby': 'basic-button',
           }}
         >
-          <MenuItem onClick={handleClose}>Histórico do funcionário</MenuItem>
-          <MenuItem onClick={handleClose}>Atualizar informações de contato</MenuItem>
+          <MenuItem onClick={handleEmployeeHistory}>Histórico do funcionário</MenuItem>
+          <MenuItem onClick={handleOpenModalUpdateContact}>Atualizar informações de contato</MenuItem>
           <MenuItem onClick={handleOpenModal}>Promover funcionário</MenuItem>
           <MenuItem onClick={handleOpenModalDelete}>Demitir ou terminar contrato</MenuItem>
         </Menu>
       </div>
-
+      
+      <ModalUpdateContact open={openModalUpdateContact} handleClose={handleCloseModalUpdateContact} />
       <ModalPromoteEmployee open={openModal} handleClose={handleCloseModal} />
       <ModalDeleteEmployee open={openModalDelete} handleClose={handleCloseModalDelete} />
     </ListItem>

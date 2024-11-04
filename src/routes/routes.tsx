@@ -9,6 +9,7 @@ import { Home } from "../pages/home"
 import { Layout } from "../components/layout/layout"
 import { ListEmployees } from "../pages/list-employees"
 import { AddEmployee } from "../pages/add-employee"
+import { EmployeeHistory } from "../pages/employee-history"
 
 
 export const Routers = () => {
@@ -20,6 +21,7 @@ export const Routers = () => {
           <>
           <Route path="/home" element={<Home />} />
           <Route path="/list-employees" element={<ListEmployees />} />
+          <Route path="/employee-history" element={<EmployeeHistory />} />
           <Route path="/add-employee" element={<AddEmployee />} />
           </>
         ) : (
