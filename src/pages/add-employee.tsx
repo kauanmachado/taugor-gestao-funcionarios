@@ -88,12 +88,12 @@ export const AddEmployee = () => {
   const uploadImage = async () => {
     if (employee.contactInfo.profilePicture && typeof employee.contactInfo.profilePicture !== 'string') {
       const picture: File = employee.contactInfo.profilePicture;
-      const imageRef = ref(storage, `profile-pictures/${picture + v4()}`)
+      const imageRef = ref(storage, `profile-pictures/${picture.name + v4()}`);
       await uploadBytes(imageRef, picture)
       const pictureURL = await getDownloadURL(imageRef)
       setPictureURL(pictureURL)
     }
-  };
+  }
 
   const handleRounded = () => {
     setIsRounded(prev => !prev)
@@ -109,12 +109,12 @@ export const AddEmployee = () => {
   }
 
   const generateAndUploadPdf = async () => {
-    const input = document.getElementById('document');
+    const input = document.getElementById('document')
     if (input) {
-      const pdfData = await generatePDF(input);
+      const pdfData = await generatePDF(input)
       const pdfRef = ref(storage, `funcionarios-pdf/${employee.contactInfo.name}${employee.contactInfo.lastName}.pdf` + v4());
-      await uploadBytes(pdfRef, pdfData);
-      const pdfURL = await getDownloadURL(pdfRef);
+      await uploadBytes(pdfRef, pdfData)
+      const pdfURL = await getDownloadURL(pdfRef)
       setEmployeePDFUrl(pdfURL)
     }
   }

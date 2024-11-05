@@ -3,6 +3,7 @@ import { Box, Button, Modal, Typography } from "@mui/material"
 type DataProps = {
     handleClose: () => void
     open: boolean
+    onConfirm: () => void
 }
 
 const style = {
@@ -17,10 +18,10 @@ const style = {
     p: 4,
 }
 
-export const ModalDeleteEmployee = ({ open, handleClose }: DataProps) => {
+export const ModalDeleteEmployee = ({ open, handleClose, onConfirm }: DataProps) => {
 
     const confirm = () => {
-        alert("Funcionário demitido.")
+        onConfirm()
         handleClose()
     }
 

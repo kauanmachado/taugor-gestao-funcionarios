@@ -35,7 +35,7 @@ export const ModalCreateEmployee = ({ employee, open, handleClose, createEmploye
         createEmployee(employee)
         handleClose()
         alert("Funcionário criado com sucesso")
-        navigate('/listar-funcionarios')
+        navigate('/list-employees')
     }
     return (
         <Modal

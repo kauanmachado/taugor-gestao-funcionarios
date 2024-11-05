@@ -1,12 +1,27 @@
 import { getStates } from "@brazilian-utils/brazilian-utils"
 import { Box, Button, FormControl, InputLabel, MenuItem, Modal, Select, TextField, Typography } from "@mui/material"
+import { doc, updateDoc } from "firebase/firestore"
 import { useForm } from "react-hook-form"
+import { db } from "../../firebase/config"
 
 type DataProps = {
     handleClose: () => void
     open: boolean
+    employeeId: string,
+
 }
 
+type FormValues = {
+    name: string
+    lastName: string
+    cep: string
+    number: string
+    uf: string
+    logradouro: string
+    email: string
+    phone: string
+    birthday: string
+}
 const style = {
     position: 'absolute',
     top: '50%',
@@ -19,18 +34,40 @@ const style = {
     p: 4,
 }
 
-export const ModalUpdateContact = ({ open, handleClose }: DataProps) => {
+export const ModalUpdateContact = ({ open, handleClose, employeeId,  }: DataProps) => {
     const { handleSubmit, register, formState: { errors } } = useForm<DataProps>({
         mode: "onBlur",
         // resolver: zodResolver(schema)
     })
     const ufs = getStates()
 
-    const confirm = () => {
-        alert("Funcionário promovido!")
-        handleClose()
-    }
+    const confirm = async (data: FormValues) => {
 
+        try {
+            const contactRef = doc(db, "employees", employeeId)
+
+            await updateDoc(contactRef, {
+                contatoInfo: {
+                    name: data.name,
+                    lastName: data.lastName,
+                    address: {
+                        cep: data.cep,
+                        number: data.number,
+                        uf: data.uf,
+                        logradouro: data.logradouro
+                    },
+                    email: data.email,
+                    phone: data.phone,
+                }
+            })
+
+            alert("Dados de contato atualizado com sucesso!")
+            handleClose()
+            // onUpdate()
+        } catch (err) {
+            console.error("Erro ao promover o funcionário:", err)
+        }
+    }
     return (
         <div>
             <Modal
@@ -107,10 +144,13 @@ export const ModalUpdateContact = ({ open, handleClose }: DataProps) => {
 
                             {...register("contactInfo.email", { required: true })}
                         />
+                         <input {...register("contactInfo.birthday", { required: true })} type='date' className='input w-full' placeholder='Data de Nascimento' />
+                         {errors.contactInfo?.birthday && <span className='text-red-500 text-xs'>Data de Nascimento é obrigatório</span>}
+                        <Button sx={{ borderRadius: '20px' }} variant="contained" type="submit" >Confirmar alterações</Button>
                     </form>
                     <hr />
                     <div className="flex justify-between">
-                        <Button sx={{ borderRadius: '20px' }} variant="contained" onClick={confirm}>Confirmar alterações</Button>
+                        
                         <Button sx={{ borderRadius: '20px' }} onClick={() => handleClose()} color='error'>Cancelar</Button>
                     </div>
                 </Box>
