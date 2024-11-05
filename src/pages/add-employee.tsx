@@ -16,6 +16,7 @@ import { getStates } from '@brazilian-utils/brazilian-utils'
 import { v4 } from 'uuid'
 import { ModalCreateEmployee } from '../components/modals/modal-create-employee'
 import { addDoc, collection } from 'firebase/firestore'
+import { formatDate } from '../functions/format-date'
 
 const initialEmployeeState: IEmployee = {
   contactInfo: {
@@ -120,7 +121,15 @@ export const AddEmployee = () => {
   }
 
   const addEmployee = async () => {
+
+    const date = new Date()
+    const formattedDate = formatDate(date)
     try {
+      const initialPDFVersion = {
+        date: formattedDate,
+        pdfPath: employeePdfUrl
+      }
+
       await addDoc(employeesCollectionRef, {
         contatoInfo: {
           name: employeeData.contactInfo.name,
@@ -143,7 +152,10 @@ export const AddEmployee = () => {
           sector: employeeData.employeeInfo.sector,
           salary: Number(employeeData.employeeInfo.salary),
         },
-        employeePDF: employeePdfUrl
+        employeePDF: employeePdfUrl,
+        histories: {
+          versions: [initialPDFVersion]
+        }
       })
     } catch(err) {
       console.error(err)

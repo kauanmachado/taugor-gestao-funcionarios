@@ -24,8 +24,13 @@ interface EmployeeInfo {
     isFired?: boolean
 }
 
+interface PDFVersion {
+    pdfPath: string; 
+    date: Date; 
+}
+
 interface Histories {
-    user: string
+    versions: PDFVersion[];
 }
 
 export interface IEmployee {

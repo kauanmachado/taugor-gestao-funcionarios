@@ -1,7 +1,10 @@
 import { Box, Button, Modal, TextField, Typography } from "@mui/material"
-import { doc, updateDoc } from "firebase/firestore"
+import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore"
 import { useForm } from "react-hook-form"
-import { db } from "../../firebase/config"
+import { db, storage } from "../../firebase/config"
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
+import { v4 } from "uuid"
+import { copyPdf } from "../../functions/copy-pdf"
 
 type DataProps = {
     handleClose: () => void
@@ -34,16 +37,31 @@ export const ModalPromoteEmployee = ({ open, handleClose, onUpdate, employeeId }
     })
 
     const confirm = async (data: FormValues) => {
+        const employeeRef = doc(db, "employees", employeeId)
+        const date = new Date()
+        const formattedDate = date.toLocaleDateString()
 
         try {
-            const employeeRef = doc(db, "employees", employeeId)
+            const employeeDoc = await getDoc(employeeRef)
+            const employeeData = employeeDoc.data()
+            const oldPdfPath = employeeData?.employeePDF
+            const newPdfPath = `funcionarios-pdf/${employeeId}.pdf`
+
 
             await updateDoc(employeeRef, {
                 employeeInfo: {
                     role: data.role,
                     sector: data.sector
-                }
+                },
+                histories: {
+                    versions: arrayUnion({ // Adicionando nova versão ao histórico
+                        date: formattedDate,
+                        pdfPath: newPdfPath,
+                    }),
+                },
             })
+
+            await copyPdf(oldPdfPath, newPdfPath)
 
             alert("Funcionário promovido com sucesso!")
             handleClose()
