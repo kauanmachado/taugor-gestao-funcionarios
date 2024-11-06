@@ -1,21 +1,25 @@
-import { Box, Button, Modal, TextField, Typography } from "@mui/material"
-import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore"
-import { useForm } from "react-hook-form"
-import { db, storage } from "../../firebase/config"
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
-import { v4 } from "uuid"
-import { copyPdf } from "../../functions/copy-pdf"
-
-type DataProps = {
-    handleClose: () => void
-    open: boolean
-    employeeId: string
-    onUpdate: () => void
-}
+import { useState, useEffect } from 'react'
+import { Modal, Box, TextField, Button, Typography } from '@mui/material'
+import { useForm, SubmitHandler } from 'react-hook-form'
+import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore'
+import { db, storage } from '../../firebase/config'
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { IEmployee } from '../../interfaces/IEmployee'
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
+import { v4 } from 'uuid'
+import { EmployeePDF } from '../employee/employee-pdf'
 
 type FormValues = {
-    role: string
-    sector: string
+  role: string
+  sector: string
+}
+
+type DataProps = {
+  handleClose: () => void
+  open: boolean
+  employeeId: string
+  onUpdate: () => void
 }
 
 const style = {
@@ -24,88 +28,161 @@ const style = {
     left: '50%',
     transform: 'translate(-50%, -50%)',
     borderRadius: 2,
-    width: 400,
+    width: '80%', 
+    maxWidth: 1000,
     bgcolor: 'background.paper',
     boxShadow: 24,
     p: 4,
+    display: 'flex',
+    gap: '20px',
+    maxHeight: '90vh', 
+    overflow: 'auto',
 }
 
-export const ModalPromoteEmployee = ({ open, handleClose, onUpdate, employeeId }: DataProps) => {
-    const { handleSubmit, register, formState: { errors } } = useForm<DataProps>({
-        mode: "onBlur",
-        // resolver: zodResolver(schema)
-    })
-
-    const confirm = async (data: FormValues) => {
-        const employeeRef = doc(db, "employees", employeeId)
-        const date = new Date()
-        const formattedDate = date.toLocaleDateString()
-
-        try {
-            const employeeDoc = await getDoc(employeeRef)
-            const employeeData = employeeDoc.data()
-            const oldPdfPath = employeeData?.employeePDF
-            const newPdfPath = `funcionarios-pdf/${employeeId}.pdf`
+export const ModalPromoteEmployee = ({ open, handleClose, employeeId, onUpdate }: DataProps) => {
+  const { register, handleSubmit } = useForm<FormValues>()
+  const [employee, setEmployee] = useState<IEmployee | null>(null)
+  const [updatedEmployeeData, setUpdatedEmployeeData] = useState<IEmployee | null>(null)
 
 
-            await updateDoc(employeeRef, {
-                employeeInfo: {
-                    role: data.role,
-                    sector: data.sector
-                },
-                histories: {
-                    versions: arrayUnion({ // Adicionando nova versão ao histórico
-                        date: formattedDate,
-                        pdfPath: newPdfPath,
-                    }),
-                },
-            })
+  useEffect(() => {
+    const fetchEmployee = async () => {
+      if (employeeId) {
+        const docRef = doc(db, 'employees', employeeId)
+        const docSnap = await getDoc(docRef)
+        if (docSnap.exists()) {
+          const employeeData = docSnap.data() as IEmployee
+          setEmployee(employeeData)
 
-            await copyPdf(oldPdfPath, newPdfPath)
-
-            alert("Funcionário promovido com sucesso!")
-            handleClose()
-            onUpdate()
-        } catch (err) {
-            console.error("Erro ao promover o funcionário:", err)
+          const updatedData = {
+            ...employeeData,
+            contactInfo: {
+              ...employeeData.contatoInfo
+            },
+            employeeInfo: {
+              ...employeeData.employeeInfo,
+              role: '',
+              sector: ''
+            },
+          }
+          setUpdatedEmployeeData(updatedData)
         }
+      }
     }
 
-    return (
-        <div>
-            <Modal
-            open={open}
-            onClose={() => handleClose()}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-        >
-            <Box sx={style} className="flex flex-col gap-5">
-                <Typography id="modal-modal-title" variant="h6" component="h2">
-                    Promoção de funcionário
-                </Typography>
-                <p className="text-sm text-gray-600">Preencha os dados do novo cargo do funcionário</p>
-                <form onSubmit={handleSubmit(confirm)} className="flex flex-col gap-4">
-                    <TextField
-                        type="text"
-                        label="Cargo"
-                        variant="filled"
-                        {...register("role")}
-                    />
-                    <TextField
-                        type="text"
-                        label="Setor"
-                        variant="filled"
-                        {...register("sector")}
-                    />
-                    <Button sx={{ borderRadius: '20px' }} type="submit" variant="contained">Confirmar promoção</Button>
-                </form>
-                <hr/>
-                <div className="flex justify-between">
-                    
-                    <Button sx={{ borderRadius: '20px' }} onClick={() => handleClose()} color='error'>Cancelar</Button>
-                </div>
-            </Box>
-        </Modal>
+    if (open) {
+      fetchEmployee()
+    }
+  }, [open, employeeId])
+
+  const generatePDF = async (input: HTMLElement): Promise<Blob> => {
+    const pdf = new jsPDF('p', 'mm', 'a4')
+    const canvas = await html2canvas(input, { scale: 2 })
+    const imgData = canvas.toDataURL('image/jpeg', 1.0)
+    pdf.addImage(imgData, 'JPEG', 0, 0, 210, (210 * canvas.height) / canvas.width)
+    return pdf.output('blob')
+  }
+
+  const generateAndUploadPdf = async (employee: IEmployee): Promise<string> => {
+    const input = document.getElementById('document')
+    if (input) {
+      const pdfData = await generatePDF(input)
+      const pdfRef = ref(storage, `funcionarios-pdf/${employee.contactInfo?.name}_${employee.contactInfo?.lastName}_updated_${v4()}.pdf`)
+      await uploadBytes(pdfRef, pdfData)
+      return getDownloadURL(pdfRef)
+    }
+    return ''
+  }
+
+  const handlePromotion: SubmitHandler<FormValues> = async (data) => {
+    if (!employee || !updatedEmployeeData) return
+
+    const updatedData = {
+      ...updatedEmployeeData,
+      employeeInfo: {
+        ...updatedEmployeeData?.employeeInfo,
+        role: data.role,
+        sector: data.sector,
+      },
+    }
+
+    setUpdatedEmployeeData(updatedData)
+
+    const formattedDate = new Date().toLocaleDateString()
+
+    try {
+      const employeeRef = doc(db, 'employees', employeeId)
+      await updateDoc(employeeRef, {
+        employeeInfo: updatedData.employeeInfo,
+        histories: arrayUnion({
+          date: formattedDate,
+        }),
+      })
+
+      const updatedPdfURL = await generateAndUploadPdf(updatedData)
+
+      await updateDoc(employeeRef, {
+        employeePDF: updatedPdfURL,
+        histories: arrayUnion({
+          date: formattedDate,
+          pdfPath: updatedPdfURL,
+        }),
+      })
+
+      onUpdate()
+      handleClose()
+      alert('Funcionário promovido com sucesso!')
+    } catch (error) {
+      console.error('Erro ao promover funcionário:', error)
+    }
+  }
+
+  useEffect(() => {
+    if (updatedEmployeeData) {
+      generateAndUploadPdf(updatedEmployeeData)
+    }
+  }, [updatedEmployeeData]) 
+
+  return (
+    <Modal
+      open={open}
+      onClose={handleClose}
+      aria-labelledby="modal-title"
+      aria-describedby="modal-description"
+    >
+      <Box sx={style} className="flex flex-col gap-5 ">
+        <Typography id="modal-title" variant="h6" component="h2">
+          Promoção de Funcionário
+        </Typography>
+        <p className="text-sm text-gray-600">Atualize os dados de cargo e setor do funcionário</p>
+        <form onSubmit={handleSubmit(handlePromotion)} className="flex flex-col gap-4">
+          <TextField
+            type="text"
+            label="Novo Cargo"
+            variant="filled"
+            {...register('role', { required: true })}
+          />
+          <TextField
+            type="text"
+            label="Novo Setor"
+            variant="filled"
+            {...register('sector', { required: true })}
+          />
+          <Button sx={{ borderRadius: '20px' }} type="submit" variant="contained">
+            Confirmar Promoção
+          </Button>
+        </form>
+        <div className="flex justify-between">
+          <Button sx={{ borderRadius: '20px' }} onClick={handleClose} color="error">
+            Cancelar
+          </Button>
         </div>
-    )
+        <EmployeePDF
+          employee={updatedEmployeeData}
+          profilePicture={updatedEmployeeData?.profilePicture}
+          isRounded={true}
+        />
+      </Box>
+    </Modal>
+  )
 }
