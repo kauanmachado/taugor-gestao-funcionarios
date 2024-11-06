@@ -93,6 +93,7 @@ export const AddEmployee = () => {
       await uploadBytes(imageRef, picture)
       const pictureURL = await getDownloadURL(imageRef)
       setPictureURL(pictureURL)
+      
     }
   }
 
@@ -131,7 +132,7 @@ export const AddEmployee = () => {
       }
 
       await addDoc(employeesCollectionRef, {
-        contatoInfo: {
+        contactInfo: {
           name: employeeData.contactInfo.name,
           lastName: employeeData.contactInfo.lastName,
           email: employeeData.contactInfo.email,
@@ -166,7 +167,7 @@ export const AddEmployee = () => {
   return (
     <div >
 
-      <main className='md:p-10 flex flex-col lg:flex-row lg:gap-5 p-4 lg:p-10 lg:max-w-7xl lg:mx-auto lg:space-x-16'>
+      <main className='md:p-10 flex flex-col lg:flex-row lg:gap-5 p-4 lg:p-10 lg:max-w-7xl lg:mx-auto lg:space-x-16 '>
         <section className='lg:w-2/3 my-3 md:my-0'>
           <h1 className='text-xl font-bold'>Fale-nos um pouco sobre você</h1>
           <p className='text-sm text-gray-500'>Diga quem você é, como os empregadores podem entrar em contato com você e qual a sua profissão.</p>

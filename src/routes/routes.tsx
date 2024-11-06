@@ -10,6 +10,8 @@ import { Layout } from "../components/layout/layout"
 import { ListEmployees } from "../pages/list-employees"
 import { AddEmployee } from "../pages/add-employee"
 import { EmployeeHistory } from "../pages/employee-history"
+import { PromoteEmployee } from "../pages/promote-employee"
+import { UpdateEmployeeContactInfo } from "../pages/update-employee-contactinfo"
 
 
 export const Routers = () => {
@@ -23,6 +25,8 @@ export const Routers = () => {
           <Route path="/list-employees" element={<ListEmployees />} />
           <Route path="/employee-history" element={<EmployeeHistory />} />
           <Route path="/add-employee" element={<AddEmployee />} />
+          <Route path="/promote-employee/:id" element={<PromoteEmployee />} />
+          <Route path="/update-employee-contactinfo/:id" element={<UpdateEmployeeContactInfo />} />
           </>
         ) : (
           <>

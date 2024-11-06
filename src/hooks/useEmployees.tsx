@@ -15,7 +15,7 @@ export const useEmployees = () => {
                 const data = doc.data()
                 return {
                     id: doc.id,
-                    contactInfo: data.contatoInfo,
+                    contactInfo: data.contactInfo,
                     employeeInfo: data.employeeInfo,
                     employeePDF: data.employeePDF,
                     histories: data.histories

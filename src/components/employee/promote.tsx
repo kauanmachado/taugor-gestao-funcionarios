@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Modal, Box, TextField, Button, Typography } from '@mui/material'
+import { TextField, Button, Typography } from '@mui/material'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db, storage } from '../../firebase/config'
@@ -9,6 +9,7 @@ import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 import { v4 } from 'uuid'
 import { EmployeePDF } from '../employee/employee-pdf'
+import { useNavigate } from 'react-router-dom'
 
 type FormValues = {
   role: string
@@ -16,34 +17,14 @@ type FormValues = {
 }
 
 type DataProps = {
-  handleClose: () => void
-  open: boolean
   employeeId: string
-  onUpdate: () => void
 }
 
-const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    borderRadius: 2,
-    width: '80%', 
-    maxWidth: 1000,
-    bgcolor: 'background.paper',
-    boxShadow: 24,
-    p: 4,
-    display: 'flex',
-    gap: '20px',
-    maxHeight: '90vh', 
-    overflow: 'auto',
-}
-
-export const ModalPromoteEmployee = ({ open, handleClose, employeeId, onUpdate }: DataProps) => {
+export const Promote = ({ employeeId }: DataProps) => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>()
   const [employee, setEmployee] = useState<IEmployee | null>(null)
   const [updatedEmployeeData, setUpdatedEmployeeData] = useState<IEmployee | null>(null)
-
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchEmployee = async () => {
@@ -67,16 +48,13 @@ export const ModalPromoteEmployee = ({ open, handleClose, employeeId, onUpdate }
             },
           }
 
-          console.log(updatedData)
           setUpdatedEmployeeData(updatedData)
         }
       }
     }
 
-    if (open) {
-      fetchEmployee()
-    }
-  }, [open, employeeId])
+    fetchEmployee()
+  }, [employeeId])
 
   const generatePDF = async (input: HTMLElement): Promise<Blob> => {
     const pdf = new jsPDF('p', 'mm', 'a4')
@@ -100,7 +78,6 @@ export const ModalPromoteEmployee = ({ open, handleClose, employeeId, onUpdate }
   const handlePromotion: SubmitHandler<FormValues> = async (data) => {
     if (!employee || !updatedEmployeeData) return
   
-    // Atualiza os dados do funcionário com o novo cargo e setor
     const updatedData = {
       ...updatedEmployeeData,
       employeeInfo: {
@@ -138,63 +115,77 @@ export const ModalPromoteEmployee = ({ open, handleClose, employeeId, onUpdate }
         histories: updatedHistories, 
         employeePDF: updatedPdfURL,   
       })
-  
-      onUpdate() 
-      handleClose()
       alert('Funcionário promovido com sucesso!')
+      navigate("/list-employees")
     } catch (error) {
       console.error('Erro ao promover funcionário:', error)
     }
   }
 
-  useEffect(() => {
-    if (updatedEmployeeData) {
-      generateAndUploadPdf(updatedEmployeeData)
-    }
-  }, [updatedEmployeeData]) 
-
   return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="modal-title"
-      aria-describedby="modal-description"
-    >
-      <Box sx={style} className="flex flex-col gap-5 ">
-        <Typography id="modal-title" variant="h6" component="h2">
-          Promoção de Funcionário
-        </Typography>
-        <p className="text-sm text-gray-600">Atualize os dados de cargo e setor do funcionário</p>
-        <form onSubmit={handleSubmit(handlePromotion)} className="flex flex-col gap-4">
-          <TextField
-            type="text"
-            label="Novo Cargo"
-            variant="filled"
-            {...register('role', { required: true })}
-          />
-          {errors.role && <span className='text-red-500 text-xs'>Cargo é obrigatório</span>}
-          <TextField
-            type="text"
-            label="Novo Setor"
-            variant="filled"
-            {...register('sector', { required: true })}
-          />
-          {errors.sector && <span className='text-red-500 text-xs'>Setor é obrigatório</span>}
-          <Button sx={{ borderRadius: '20px' }} type="submit" variant="contained">
-            Confirmar Promoção
-          </Button>
-        </form>
-        <div className="flex justify-between">
-          <Button sx={{ borderRadius: '20px' }} onClick={handleClose} color="error">
-            Cancelar
-          </Button>
+
+        <>
+        {/* Formulário à esquerda */}
+        <div className="lg:w-2/3 my-3 md:my-0">
+          <Typography variant="h4" className="text-center font-semibold mb-4">
+            Promoção de Funcionário
+          </Typography>
+          <p className="text-sm text-center text-gray-600 mb-8">Atualize os dados de cargo e setor do funcionário</p>
+          
+          <form onSubmit={handleSubmit(handlePromotion)} className="space-y-4">
+            <div>
+              <TextField
+                type="text"
+                label="Novo Cargo"
+                variant="filled"
+                fullWidth
+                {...register('role', { required: true })}
+                className="mb-2"
+              />
+              {errors.role && <span className="text-red-500 text-xs">Cargo é obrigatório</span>}
+            </div>
+
+            <div>
+              <TextField
+                type="text"
+                label="Novo Setor"
+                variant="filled"
+                fullWidth
+                {...register('sector', { required: true })}
+                className="mb-2"
+              />
+              {errors.sector && <span className="text-red-500 text-xs">Setor é obrigatório</span>}
+            </div>
+
+            <Button 
+              type="submit" 
+              variant="contained" 
+              color="primary" 
+              fullWidth 
+              className="rounded-full py-2"
+            >
+              Confirmar Promoção
+            </Button>
+          </form>
+
+          <div className="mt-6 flex justify-between">
+            <Button 
+              onClick={() => window.history.back()} 
+              color="error" 
+              variant="outlined" 
+              className="rounded-full py-2"
+            >
+              Cancelar
+            </Button>
+          </div>
         </div>
-        <EmployeePDF
-          employee={updatedEmployeeData}
-          profilePicture={updatedEmployeeData?.profilePicture}
-          isRounded={true}
-        />
-      </Box>
-    </Modal>
+
+              <EmployeePDF
+                employee={updatedEmployeeData}
+                profilePicture={updatedEmployeeData?.profilePicture}
+                isRounded={true}
+              />
+    </>
+
   )
 }
