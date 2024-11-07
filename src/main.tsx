@@ -1,15 +1,12 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom/client";
+import * as React from "react"
+import * as ReactDOM from "react-dom/client"
 import {
-  BrowserRouter,
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
-import "./index.css";
-import App from "./pages/sign-in";
-import { Routers } from "./routes/routes";
-import { AuthProvider } from "./context/auth-provider";
-import { Layout } from "./components/layout/layout";
+  BrowserRouter
+} from "react-router-dom"
+import "./index.css"
+import { Routers } from "./routes/routes"
+import { AuthProvider } from "./context/auth-provider"
+import { Layout } from "./components/layout/layout"
 
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

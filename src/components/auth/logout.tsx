@@ -1,4 +1,3 @@
-import { Button } from "@mui/material"
 import { auth } from "../../firebase/config"
 import { signOut } from "firebase/auth"
 import { IoMdLogOut } from "react-icons/io"

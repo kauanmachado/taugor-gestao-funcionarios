@@ -1,9 +1,7 @@
 import { Autocomplete, CircularProgress, Pagination, TextField } from "@mui/material"
-import Card, { Employee } from "../components/employee/card"
+import { Employee } from "../components/employee/card"
 import { useEffect, useState } from "react"
 import { useEmployees } from "../hooks/useEmployees"
-import { deleteDoc, doc } from "firebase/firestore"
-import { db } from "../firebase/config"
 
 const ITEMS_PER_PAGE = 5
 

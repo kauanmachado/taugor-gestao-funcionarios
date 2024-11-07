@@ -1,7 +1,6 @@
 import { FaListUl } from "react-icons/fa"
 import { Logout } from "../components/auth/logout"
-import { Header } from "../components/layout/header"
-import { IoMdLogOut, IoMdPersonAdd } from "react-icons/io"
+import { IoMdPersonAdd } from "react-icons/io"
 import { Link } from "react-router-dom"
 
 export const Home = () => {

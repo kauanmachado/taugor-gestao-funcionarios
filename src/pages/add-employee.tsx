@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { RiPencilFill } from 'react-icons/ri'
 import { BiSolidUser } from 'react-icons/bi'
 import { FaRegLightbulb } from 'react-icons/fa'
@@ -32,16 +32,16 @@ const initialEmployeeState: IEmployee = {
     },
     phone: '',
     profilePicture: null,
-    birthday: new Date()
+    birthday: ''
   },
   employeeInfo: {
     role: '',
-    admissionDate: new Date(),
+    admissionDate: '',
     sector: '',
     salary: 0,
   },
   histories: {
-    user: ''
+    versions: []
   },
   employeePDF: ''
 };
@@ -56,7 +56,6 @@ export const AddEmployee = () => {
   const [open, setOpen] = useState(false)
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
-  const [pdfData, setPdfData] = useState<Blob | null>(null)
   const [employeePdfUrl, setEmployeePDFUrl] = useState<string>('')
   const employeeData = useWatch({ control })
   const employeesCollectionRef = collection(db, "employees")
@@ -133,25 +132,25 @@ export const AddEmployee = () => {
 
       await addDoc(employeesCollectionRef, {
         contactInfo: {
-          name: employeeData.contactInfo.name,
-          lastName: employeeData.contactInfo.lastName,
-          email: employeeData.contactInfo.email,
-          gender: employeeData.contactInfo.gender,
+          name: employeeData?.contactInfo?.name,
+          lastName: employeeData?.contactInfo?.lastName,
+          email: employeeData?.contactInfo?.email,
+          gender: employeeData?.contactInfo?.gender,
           address: {
-            cep: employeeData.contactInfo.address.cep,
-            logradouro: employeeData.contactInfo.address.logradouro,
-            number: Number(employeeData.contactInfo.address.number),
-            uf: employeeData.contactInfo.address.uf,
+            cep: employeeData?.contactInfo?.address?.cep,
+            logradouro: employeeData?.contactInfo?.address?.logradouro,
+            number: Number(employeeData?.contactInfo?.address?.number),
+            uf: employeeData?.contactInfo?.address?.uf,
           },
-          phone: employeeData.contactInfo.phone,
+          phone: employeeData?.contactInfo?.phone,
           profilePicture: pictureURL,
-          birthday: employeeData.contactInfo.birthday,
+          birthday: employeeData?.contactInfo?.birthday,
         },
         employeeInfo: {
-          role: employeeData.employeeInfo.role,
-          admissionDate: employeeData.employeeInfo.admissionDate,
-          sector: employeeData.employeeInfo.sector,
-          salary: Number(employeeData.employeeInfo.salary),
+          role: employeeData?.employeeInfo?.role,
+          admissionDate: employeeData?.employeeInfo?.admissionDate,
+          sector: employeeData?.employeeInfo?.sector,
+          salary: Number(employeeData?.employeeInfo?.salary),
         },
         employeePDF: employeePdfUrl,
         histories: {
@@ -368,7 +367,7 @@ export const AddEmployee = () => {
                         ))}
                       </Select>
                     </FormControl>
-                    {errors.address?.uf && <span className='text-red-500 text-xs mt-1'>UF é obrigatório</span>}
+                    {errors.contactInfo?.address?.uf && <span className='text-red-500 text-xs mt-1'>UF é obrigatório</span>}
 
                   </div>
                 </div>
@@ -466,7 +465,9 @@ export const AddEmployee = () => {
           </form>
         </section>
 
-        <EmployeePDF employee={employeeData} profilePicture={selectedImage} isRounded={isRounded} />
+        {employeeData && (
+          <EmployeePDF employee={employeeData} />
+        )}
       </main>
       {(open && pictureURL != '' && employeePdfUrl != '') && <ModalCreateEmployee employee={employee} createEmployee={addEmployee} handleClose={handleClose} handleOpen={handleOpen} open={open} />}
     </div>

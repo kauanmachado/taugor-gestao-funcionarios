@@ -3,10 +3,8 @@ import { IEmployee } from "../../interfaces/IEmployee"
 
 type EmployeeProps = {
     employee: IEmployee
-    profilePicture: string | null
-    isRounded: boolean
 }
-export const EmployeePDF = ({ employee, profilePicture, isRounded}: EmployeeProps) => {
+export const EmployeePDF = ({ employee }: EmployeeProps) => {
     const [employeeToRender, setEmployeeToRender] = useState<IEmployee>(employee)
 
     useEffect(() => {
@@ -15,14 +13,6 @@ export const EmployeePDF = ({ employee, profilePicture, isRounded}: EmployeeProp
     return (
         <section className='bg-gray-100 flex justify-center items-center lg:w-2/3 w-full '>
             <div className='bg-white a4 shadow-lg rounded-sm p-10 flex flex-col gap-3 w-full h-full min-h-[800px]'  id='document'>
-                {/* <div className='without-border-top px-3 pb-5 flex flex-col gap-5'>
-                    {profilePicture &&
-                        <div className='flex justify-center items-center'>
-                            <img className={`w-40 h-40 object-cover ${isRounded ? 'rounded-full' : ''}`} src={profilePicture} alt='profile picture' />
-                        </div>
-                    }
-                    
-                </div> */}
                 <div className="border border-baseBlue px-3 py-4">
                         <h1 className='text-baseBlue text-1xl font-bold'>{employeeToRender?.contactInfo?.name} {employeeToRender?.contactInfo?.lastName}</h1>
                         <p className='text-xs text-gray-500'>Telefone: {employeeToRender?.contactInfo?.phone}</p>

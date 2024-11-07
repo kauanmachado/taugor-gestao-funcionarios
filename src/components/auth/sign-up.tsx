@@ -1,6 +1,5 @@
-import { useState } from "react"
-import { auth, googleProvider } from "../../firebase/config"
-import { createUserWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth"
+import { auth } from "../../firebase/config"
+import { createUserWithEmailAndPassword } from "firebase/auth"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"

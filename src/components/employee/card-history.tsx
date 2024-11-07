@@ -7,7 +7,7 @@ type DataProps = {
     date: string
 }
 
-export const CardHistory = ({ id, pdfPath, date }: DataProps) => {
+export const CardHistory = ({ pdfPath, date }: DataProps) => {
     const handleViewPDF = () => {
         if (pdfPath) {
             window.open(pdfPath, '_blank')

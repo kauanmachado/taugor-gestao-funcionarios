@@ -1,11 +1,9 @@
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
-import { useState } from 'react';
-import { IEmployee } from '../../interfaces/IEmployee';
-import { useNavigate } from 'react-router-dom';
-import { PiX } from 'react-icons/pi';
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
+import Modal from '@mui/material/Modal'
+import { IEmployee } from '../../interfaces/IEmployee'
+import { useNavigate } from 'react-router-dom'
 
 type DataProps = {
     handleOpen: Function

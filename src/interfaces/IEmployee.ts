@@ -13,12 +13,12 @@ interface ContactInfo {
     address: AddressInfo;
     phone: string;
     profilePicture: File | null | string;
-    birthday: Date;
+    birthday: string;
 }
 
 interface EmployeeInfo {
     role: string;
-    admissionDate: Date;
+    admissionDate: string;
     sector: string;
     salary: number;
     isFired?: boolean

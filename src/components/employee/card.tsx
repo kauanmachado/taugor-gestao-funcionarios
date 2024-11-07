@@ -1,20 +1,14 @@
-import { ListItem, Avatar, Button, Menu, MenuItem } from '@mui/material';
-import { TiThMenu } from 'react-icons/ti';
-import { useState } from 'react';
-import { IEmployee } from '../../interfaces/IEmployee';
-import { useNavigate } from 'react-router-dom';
-// import { ModalUpdateContact } from '../modals/modal-update-contact';
-import { ModalPromoteEmployee } from '../modals/modal-promote-employee';
-import { ModalDeleteEmployee } from '../modals/modal-delete-employee';
-import { deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import { ListItem, Avatar, Button, Menu, MenuItem } from '@mui/material'
+import { TiThMenu } from 'react-icons/ti'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ModalDeleteEmployee } from '../modals/modal-delete-employee'
+import { deleteDoc, doc } from 'firebase/firestore'
+import { db } from '../../firebase/config'
 
-export const Employee = ({ id, contactInfo, employeeInfo, employeePDF, onDelete, onUpdate }: any) => {
+export const Employee = ({ id, contactInfo, employeeInfo, employeePDF, onDelete }: any) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const [openModalUpdateEmployee, setOpenModalUpdateEmployee] = useState(false)
-  const [redirectPromoteEmployee, setRedirectPromoteEmployee] = useState(false)
   const [openModalDelete, setOpenModalDelete] = useState(false)
-  const [openModalUpdateContact, setOpenModalUpdateContact] = useState(false)
   const open = Boolean(anchorEl)
   const navigate = useNavigate()
 
@@ -89,8 +83,6 @@ export const Employee = ({ id, contactInfo, employeeInfo, employeePDF, onDelete,
         <MenuItem onClick={handleOpenModalDelete}>Demitir ou terminar contrato</MenuItem>
       </Menu>
 
-      {/* <ModalUpdateContact open={openModalUpdateContact} handleClose={handleCloseModalUpdateContact} employeeId={id} /> */}
-      {/* <ModalPromoteEmployee open={openModalUpdateEmployee} handleClose={handleCloseModalUpdateEmployee} employeeId={id} onUpdate={handleUpdateEmployee}/> */}
       <ModalDeleteEmployee
         open={openModalDelete}
         handleClose={handleCloseModalDelete}

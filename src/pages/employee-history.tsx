@@ -1,3 +1,4 @@
+// @ts-ignore
 import { CardHistory } from "../components/employee/card-history"
 import { useParams } from "react-router-dom"
 import { useEmployees } from "../hooks/useEmployees"

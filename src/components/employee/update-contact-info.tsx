@@ -1,4 +1,4 @@
-import { Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material"
+import { Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { db, storage } from "../../firebase/config"
 import { IEmployee } from "../../interfaces/IEmployee"
@@ -8,7 +8,6 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
 import { useEffect, useState } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
-import { DatePicker } from "../date-picker"
 import { EmployeePDF } from "./employee-pdf"
 import { getStates } from "@brazilian-utils/brazilian-utils"
 import { RiPencilFill } from "react-icons/ri"
@@ -213,7 +212,7 @@ export const UpdateContactInfo = ({ employeeId }: DataProps) => {
                             {errors.lastName && <span className='text-red-500 text-xs mt-1'>Sobrenome é obrigatório</span>}
                             <p className='text-xs text-gray-500'>ex: Machado</p>
                         </div>
-                        
+
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-4">
@@ -329,11 +328,9 @@ export const UpdateContactInfo = ({ employeeId }: DataProps) => {
 
 
             </div>
-            <EmployeePDF
-                employee={updatedEmployeeData}
-                profilePicture={updatedEmployeeData?.profilePicture}
-                isRounded={true}
-            />
+            {updatedEmployeeData && (
+                <EmployeePDF employee={updatedEmployeeData} />
+            )}
         </>
     )
 }

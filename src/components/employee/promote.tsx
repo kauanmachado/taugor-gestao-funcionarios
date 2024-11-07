@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { TextField, Button, Typography } from '@mui/material'
+import { TextField, Button } from '@mui/material'
 import { useForm, SubmitHandler } from 'react-hook-form'
-import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db, storage } from '../../firebase/config'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { IEmployee } from '../../interfaces/IEmployee'
@@ -78,7 +78,7 @@ export const Promote = ({ employeeId }: DataProps) => {
 
   const handlePromotion: SubmitHandler<FormValues> = async (data) => {
     if (!employee || !updatedEmployeeData) return
-  
+
     const updatedData = {
       ...updatedEmployeeData,
       employeeInfo: {
@@ -88,49 +88,48 @@ export const Promote = ({ employeeId }: DataProps) => {
         salary: data.salary
       },
     }
-  
+
+    // @ts-ignore
     setUpdatedEmployeeData(updatedData)
-  
+
     const date = new Date()
     const formattedDate = date.toLocaleDateString()
-  
+
     try {
       const employeeRef = doc(db, 'employees', employeeId)
       const employeeDocSnap = await getDoc(employeeRef)
-  
+
       if (!employeeDocSnap.exists()) {
         throw new Error('Funcionário não encontrado!')
       }
-  
+
       const currentHistories = employeeDocSnap.data()?.histories
         ? employeeDocSnap.data()?.histories
         : {}
-  
-      // Garante que o campo 'versions' exista como um array
+
       const currentVersions = Array.isArray(currentHistories.versions)
         ? currentHistories.versions
         : []
-  
+
+      // @ts-ignore
       const updatedPdfURL = await generateAndUploadPdf(updatedData)
-  
+
       const newVersion = {
         date: formattedDate,
         pdfPath: updatedPdfURL,
       }
-  
-      // Atualizando o array de versões com o novo item
+
       const updatedVersions = [...currentVersions, newVersion]
-  
-      // Agora, atualizando o Firestore com o novo histórico e versão
+
       await updateDoc(employeeRef, {
         employeeInfo: updatedData.employeeInfo,
         histories: {
           ...currentHistories,
-          versions: updatedVersions,  // Atualiza as versões
+          versions: updatedVersions,
         },
         employeePDF: updatedPdfURL,
       })
-  
+
       alert('Funcionário promovido com sucesso!')
       navigate("/list-employees")
     } catch (error) {
@@ -138,7 +137,7 @@ export const Promote = ({ employeeId }: DataProps) => {
       alert('Erro ao promover funcionário. Tente novamente.')
     }
   }
-  
+
 
   return (
     <>
@@ -199,11 +198,9 @@ export const Promote = ({ employeeId }: DataProps) => {
         </form>
       </div>
 
-      <EmployeePDF
-        employee={updatedEmployeeData}
-        profilePicture={updatedEmployeeData?.profilePicture}
-        isRounded={true}
-      />
+      {updatedEmployeeData && (
+        <EmployeePDF employee={updatedEmployeeData} />
+      )}
     </>
   )
 }
