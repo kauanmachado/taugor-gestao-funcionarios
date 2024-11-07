@@ -15,7 +15,7 @@ export const Logout = () => {
 
     return (
         <div>
-            <button onClick={logout} className="flex items-center justify-center bg-red-300 text-white p-4 h-[100px] shadow-lg rounded gap-2 text-red-500 border border-red-500">
+            <button onClick={logout} className="flex items-center justify-center bg-red-300 text-white p-4 h-[100px] shadow-lg rounded gap-2 text-red-500 border border-red-500 hover:scale-105 transition-all">
                 <IoMdLogOut />
                 Fazer logout
             </button>

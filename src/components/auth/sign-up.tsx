@@ -17,7 +17,7 @@ type DataProps = z.infer<typeof schema>
 
 export const SignUp = () => {
 
-    const { handleSubmit, register, formState: { errors } } = useForm<DataProps>({
+    const { handleSubmit, register, formState: { errors }, setError } = useForm<DataProps>({
         mode: "onBlur",
         resolver: zodResolver(schema)
     })
@@ -29,11 +29,15 @@ export const SignUp = () => {
             await createUserWithEmailAndPassword(auth, email, password)
         } catch(err){
             console.error(err)
+            setError("email", {
+                type: "manual",
+                message: "Usuário já cadastrado!"
+            })
         } 
     }
 
     return (
-        <div className="flex flex-col shadow bg-white rounded-lg md:w-[600px] p-12">
+        <div className="flex flex-col shadow bg-white rounded-lg md:w-[600px] p-8">
             <img src={logo} className="w-[150px] mb-8"></img>
             <h1 className="text-start font-bold">Preencha os dados para criar sua conta</h1>
             <form onSubmit={handleSubmit(signUp)} className="flex flex-col gap-4 my-4">

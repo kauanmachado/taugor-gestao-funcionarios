@@ -10,10 +10,13 @@ import html2canvas from 'html2canvas'
 import { v4 } from 'uuid'
 import { EmployeePDF } from '../employee/employee-pdf'
 import { useNavigate } from 'react-router-dom'
+import { RiPencilFill } from 'react-icons/ri'
+import { GoToList } from '../gotolist'
 
 type FormValues = {
   role: string
   sector: string
+  salary: string
 }
 
 type DataProps = {
@@ -42,9 +45,7 @@ export const Promote = ({ employeeId }: DataProps) => {
             },
             employeeInfo: {
               ...employeeData.employeeInfo,
-              admissionDate: employeeData.employeeInfo?.admissioDate,
-              role: '',
-              sector: ''
+              admissionDate: employeeData.employeeInfo?.admissionDate, // corrigido o nome da propriedade
             },
           }
 
@@ -84,12 +85,14 @@ export const Promote = ({ employeeId }: DataProps) => {
         ...updatedEmployeeData.employeeInfo,
         role: data.role,
         sector: data.sector,
+        salary: data.salary
       },
     }
   
     setUpdatedEmployeeData(updatedData)
   
-    const formattedDate = new Date().toLocaleDateString()
+    const date = new Date()
+    const formattedDate = date.toLocaleDateString()
   
     try {
       const employeeRef = doc(db, 'employees', employeeId)
@@ -99,93 +102,108 @@ export const Promote = ({ employeeId }: DataProps) => {
         throw new Error('Funcionário não encontrado!')
       }
   
-      const currentHistories = employeeDocSnap.data()?.histories || []
+      const currentHistories = employeeDocSnap.data()?.histories
+        ? employeeDocSnap.data()?.histories
+        : {}
+  
+      // Garante que o campo 'versions' exista como um array
+      const currentVersions = Array.isArray(currentHistories.versions)
+        ? currentHistories.versions
+        : []
   
       const updatedPdfURL = await generateAndUploadPdf(updatedData)
   
-      const newHistory = {
+      const newVersion = {
         date: formattedDate,
         pdfPath: updatedPdfURL,
       }
   
-      const updatedHistories = [...currentHistories, newHistory]
+      // Atualizando o array de versões com o novo item
+      const updatedVersions = [...currentVersions, newVersion]
   
+      // Agora, atualizando o Firestore com o novo histórico e versão
       await updateDoc(employeeRef, {
         employeeInfo: updatedData.employeeInfo,
-        histories: updatedHistories, 
-        employeePDF: updatedPdfURL,   
+        histories: {
+          ...currentHistories,
+          versions: updatedVersions,  // Atualiza as versões
+        },
+        employeePDF: updatedPdfURL,
       })
+  
       alert('Funcionário promovido com sucesso!')
       navigate("/list-employees")
     } catch (error) {
       console.error('Erro ao promover funcionário:', error)
+      alert('Erro ao promover funcionário. Tente novamente.')
     }
   }
+  
 
   return (
-
-        <>
-        {/* Formulário à esquerda */}
-        <div className="lg:w-2/3 my-3 md:my-0">
-          <Typography variant="h4" className="text-center font-semibold mb-4">
-            Promoção de Funcionário
-          </Typography>
-          <p className="text-sm text-center text-gray-600 mb-8">Atualize os dados de cargo e setor do funcionário</p>
-          
-          <form onSubmit={handleSubmit(handlePromotion)} className="space-y-4">
-            <div>
-              <TextField
-                type="text"
-                label="Novo Cargo"
-                variant="filled"
-                fullWidth
-                {...register('role', { required: true })}
-                className="mb-2"
-              />
-              {errors.role && <span className="text-red-500 text-xs">Cargo é obrigatório</span>}
-            </div>
-
-            <div>
-              <TextField
-                type="text"
-                label="Novo Setor"
-                variant="filled"
-                fullWidth
-                {...register('sector', { required: true })}
-                className="mb-2"
-              />
-              {errors.sector && <span className="text-red-500 text-xs">Setor é obrigatório</span>}
-            </div>
-
-            <Button 
-              type="submit" 
-              variant="contained" 
-              color="primary" 
-              fullWidth 
-              className="rounded-full py-2"
-            >
-              Confirmar Promoção
-            </Button>
-          </form>
-
-          <div className="mt-6 flex justify-between">
-            <Button 
-              onClick={() => window.history.back()} 
-              color="error" 
-              variant="outlined" 
-              className="rounded-full py-2"
-            >
-              Cancelar
-            </Button>
+    <>
+      {/* Formulário à esquerda */}
+      <div className="lg:w-2/3 my-3 md:my-0">
+        <GoToList />
+        <div className="flex items-center gap-3 my-5">
+          <h2 className='text-xl font-bold'>Informações do funcionário</h2>
+          <RiPencilFill className="text-gray-400 text-lg" />
+        </div >
+        <p className="text-sm text-gray-600 mb-8">Atualize as informações de cargo e setor do funcionário</p>
+        <form onSubmit={handleSubmit(handlePromotion)} className="space-y-4">
+          <div>
+            <TextField
+              type="text"
+              label="Novo Cargo"
+              variant="filled"
+              fullWidth
+              {...register('role', { required: true })}
+              className="mb-2"
+            />
+            {errors.role && <span className="text-red-500 text-xs">Cargo é obrigatório</span>}
+            <p className='text-xs text-gray-500'>ex: Desenvolvedor</p>
           </div>
-        </div>
 
-              <EmployeePDF
-                employee={updatedEmployeeData}
-                profilePicture={updatedEmployeeData?.profilePicture}
-                isRounded={true}
-              />
+          <div>
+            <TextField
+              type="text"
+              label="Novo Setor"
+              variant="filled"
+              fullWidth
+              {...register('sector', { required: true })}
+              className="mb-2"
+            />
+            {errors.sector && <span className="text-red-500 text-xs">Setor é obrigatório</span>}
+            <p className='text-xs text-gray-500'>ex: TI</p>
+          </div>
+
+          <div>
+            <TextField
+              type="number"
+              label="Salário"
+              placeholder="Salário"
+              variant="filled"
+              fullWidth
+              {...register("salary", { required: true, valueAsNumber: true, min: 1 })}
+            />
+            {errors.salary && <span className='text-red-500 text-xs'>Salário incorreto ou não preenchido</span>}
+          </div>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            sx={{ padding: '12px 24px', borderRadius: '20px', width: '100%' }}
+          >
+            Confirmar Promoção
+          </Button>
+        </form>
+      </div>
+
+      <EmployeePDF
+        employee={updatedEmployeeData}
+        profilePicture={updatedEmployeeData?.profilePicture}
+        isRounded={true}
+      />
     </>
-
   )
 }

@@ -1,12 +1,18 @@
 import { Button, ListItem } from "@mui/material"
 
-export const CardHistory = () => {
-    const employeePDF = "TESTE"
+
+type DataProps = {
+    id: string
+    pdfPath: string
+    date: string
+}
+
+export const CardHistory = ({ id, pdfPath, date }: DataProps) => {
     const handleViewPDF = () => {
-        if (employeePDF) {
-          window.open(employeePDF, '_blank')
+        if (pdfPath) {
+            window.open(pdfPath, '_blank')
         } else {
-          alert("PDF não disponível.")
+            alert("PDF não disponível.")
         }
     }
 
@@ -14,7 +20,7 @@ export const CardHistory = () => {
         <ListItem alignItems="center" className="flex shadow rounded bg-white justify-between p-4">
             <div className="flex flex-col flex-grow ml-4">
                 <p className="font-bold text-baseBlue">
-                Data de modificação: 23/02/2024
+                <p className="text-gray-800">Data de modificação</p> {date}
                 </p>
                 <p className="text-gray-600 text-sm"></p>
                 <p className="text-gray-600 text-sm">

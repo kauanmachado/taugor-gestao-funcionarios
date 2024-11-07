@@ -17,7 +17,7 @@ type DataProps = z.infer<typeof schema>
 
 export const SignIn = () => {
 
-    const { handleSubmit, register, formState: { errors } } = useForm<DataProps>({
+    const { handleSubmit, register, formState: { errors }, setError } = useForm<DataProps>({
         mode: "onBlur",
         resolver: zodResolver(schema)
     })
@@ -31,6 +31,14 @@ export const SignIn = () => {
             await signInWithEmailAndPassword(auth, email, password)
         } catch (err) {
             console.error(err)
+            setError("email", {
+                type: "manual",
+                message: "Credenciais incorretas. Verifique seu e-mail e senha."
+            })
+            setError("password", {
+                type: "manual",
+                message: "Credenciais incorretas. Verifique seu e-mail e senha."
+            })
         }
     }
 
@@ -65,7 +73,6 @@ export const SignIn = () => {
             </div>
 
             <div className="md:w-1/2 md:p-12">
-                {/* <h1 className="text-start font-bold">Entrar na minha conta</h1> */}
                 <form onSubmit={handleSubmit(signIn)} className="flex flex-col gap-4">
                     <TextField
                         id="email"

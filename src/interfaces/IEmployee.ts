@@ -18,7 +18,7 @@ interface ContactInfo {
 
 interface EmployeeInfo {
     role: string;
-    admissioDate: Date;
+    admissionDate: Date;
     sector: string;
     salary: number;
     isFired?: boolean

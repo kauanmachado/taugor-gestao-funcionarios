@@ -3,7 +3,7 @@ import { TiThMenu } from 'react-icons/ti';
 import { useState } from 'react';
 import { IEmployee } from '../../interfaces/IEmployee';
 import { useNavigate } from 'react-router-dom';
-import { ModalUpdateContact } from '../modals/modal-update-contact';
+// import { ModalUpdateContact } from '../modals/modal-update-contact';
 import { ModalPromoteEmployee } from '../modals/modal-promote-employee';
 import { ModalDeleteEmployee } from '../modals/modal-delete-employee';
 import { deleteDoc, doc } from 'firebase/firestore';
@@ -22,34 +22,23 @@ export const Employee = ({ id, contactInfo, employeeInfo, employeePDF, onDelete,
     setAnchorEl(event.currentTarget)
   }
   const handleClose = () => setAnchorEl(null)
-
-  const handleOpenModalUpdateEmployee = () => {
-    setOpenModalUpdateEmployee(true)
-    handleClose()
-  }
   
   const handleRedirectPromoteEmployee = () => {
     navigate(`/promote-employee/${id}`)
   }
-  const handleCloseModalUpdateEmployee = () => setOpenModalUpdateEmployee(false)
 
-  const handleEmployeeHistory = () => {
-    navigate('/employee-history')
-    handleClose()
+  const handleRedirectEmployeeHistory = () => {
+    navigate(`/employee-history/${id}`)
+  }
+
+  const handleRedirectUpdateContact = () => {
+    navigate(`/update-employee-contactinfo/${id}`)
   }
 
   const handleOpenModalDelete = () => {
     setOpenModalDelete(true)
     handleClose()
   }
-  const handleCloseModalUpdateContact = () => setOpenModalUpdateContact(false)
-
-  const handleOpenModalUpdateContact = () => {
-    setOpenModalUpdateContact(true)
-    handleClose()
-  }
-
-
 
   const handleCloseModalDelete = () => setOpenModalDelete(false)
 
@@ -66,10 +55,6 @@ export const Employee = ({ id, contactInfo, employeeInfo, employeePDF, onDelete,
     }
   }
 
-  const handleUpdateEmployee = () => {
-    handleCloseModalUpdateEmployee()
-    onUpdate(id)
-  }
 
   const handleViewPDF = () => {
     if (employeePDF) {
@@ -98,13 +83,13 @@ export const Employee = ({ id, contactInfo, employeeInfo, employeePDF, onDelete,
         <TiThMenu />
       </Button>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <MenuItem onClick={handleEmployeeHistory}>Histórico do funcionário</MenuItem>
-        <MenuItem onClick={handleOpenModalUpdateContact}>Atualizar informações de contato</MenuItem>
+        <MenuItem onClick={handleRedirectEmployeeHistory}>Histórico do funcionário</MenuItem>
+        <MenuItem onClick={handleRedirectUpdateContact}>Atualizar informações de contato</MenuItem>
         <MenuItem onClick={handleRedirectPromoteEmployee}>Promover funcionário</MenuItem>
         <MenuItem onClick={handleOpenModalDelete}>Demitir ou terminar contrato</MenuItem>
       </Menu>
 
-      <ModalUpdateContact open={openModalUpdateContact} handleClose={handleCloseModalUpdateContact} employeeId={id} />
+      {/* <ModalUpdateContact open={openModalUpdateContact} handleClose={handleCloseModalUpdateContact} employeeId={id} /> */}
       {/* <ModalPromoteEmployee open={openModalUpdateEmployee} handleClose={handleCloseModalUpdateEmployee} employeeId={id} onUpdate={handleUpdateEmployee}/> */}
       <ModalDeleteEmployee
         open={openModalDelete}

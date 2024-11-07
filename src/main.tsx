@@ -6,7 +6,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import "./index.css";
-import App from "./App";
+import App from "./pages/sign-in";
 import { Routers } from "./routes/routes";
 import { AuthProvider } from "./context/auth-provider";
 import { Layout } from "./components/layout/layout";

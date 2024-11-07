@@ -93,7 +93,7 @@ export const AddEmployee = () => {
       await uploadBytes(imageRef, picture)
       const pictureURL = await getDownloadURL(imageRef)
       setPictureURL(pictureURL)
-      
+
     }
   }
 
@@ -149,7 +149,7 @@ export const AddEmployee = () => {
         },
         employeeInfo: {
           role: employeeData.employeeInfo.role,
-          admissioDate: employeeData.employeeInfo.admissionDate,
+          admissionDate: employeeData.employeeInfo.admissionDate,
           sector: employeeData.employeeInfo.sector,
           salary: Number(employeeData.employeeInfo.salary),
         },
@@ -158,9 +158,44 @@ export const AddEmployee = () => {
           versions: [initialPDFVersion]
         }
       })
-    } catch(err) {
+    } catch (err) {
       console.error(err)
     }
+  }
+
+  const validatePhoneNumber = (phone: string) => {
+    const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/
+    return phoneRegex.test(phone) || "Formato de telefone inválido ou não preenchido"
+  }
+
+  const validateBirthday = (birthday: string) => {
+    const today = new Date()
+    const birthdayDate = new Date(birthday)
+
+    if (isNaN(birthdayDate.getTime())) {
+      return "Data de nascimento inválida"
+    }
+
+    if (birthdayDate > today) {
+      return "Data de nascimento não pode ser posterior à data atual"
+    }
+
+    return true
+  }
+
+  const validateAdmission = (admission: string) => {
+    const today = new Date()
+    const admissionDate = new Date(admission)
+
+    if (isNaN(admissionDate.getTime())) {
+      return "Data de admissão inválida"
+    }
+
+    if (admissionDate > today) {
+      return "Data de admissão não pode ser posterior à data atual"
+    }
+
+    return true
   }
 
 
@@ -223,36 +258,36 @@ export const AddEmployee = () => {
                   )}
                 </div>
                 <div>
-                  {selectedImage ? (<></>) :
-                    (
-                      <>
-                        <div className='flex items-center gap-3 mb-3'>
-                          <p className="">Foto do Perfil</p>
-                          <div className='rounded-full p-1 bg-gray-200'>
-                            <FaRegLightbulb className="text-gray-400" />
-                          </div>
+                  {selectedImage ? (<></>) : (
+                    <>
+                      <div className='flex items-center gap-3 mb-3'>
+                        <p className="">Foto do Perfil</p>
+                        <div className='rounded-full p-1 bg-gray-200'>
+                          <FaRegLightbulb className="text-gray-400" />
                         </div>
-                        <div className='flex items-center gap-3'>
-                          <label htmlFor='upload-photo' className='flex items-center gap-3'>
-                            <div className='rounded-full p-1 bg-blue-500 cursor-pointer hover:bg-blue-300 transition-colors'>
-                              <AiOutlineArrowUp className='text-white ' />
-                            </div>
-                          </label>
-                          <p className='text-sm'>Adicionar Foto</p>
-                          <input
-                            type='file'
-                            id='upload-photo'
-                            // @ts-ignore
-                            onChangeCapture={(e) => handleSelectedPicture(e)}
-                            style={{ display: 'none' }}
-                            {...register("contactInfo.profilePicture")}
-                          />
-                        </div>
-                      </>
-                    )}
+                      </div>
+                    </>
+                  )}
 
-
+                  {/* O botão de upload é sempre visível */}
+                  <div className='flex items-center gap-3'>
+                    <label htmlFor='upload-photo' className='flex items-center gap-3'>
+                      <div className='rounded-full p-1 bg-blue-500 cursor-pointer hover:bg-blue-300 transition-colors'>
+                        <AiOutlineArrowUp className='text-white ' />
+                      </div>
+                    </label>
+                    <p className='text-sm'>Adicionar Foto</p>
+                    <input
+                      type='file'
+                      id='upload-photo'
+                      // @ts-ignore
+                      onChangeCapture={(e) => handleSelectedPicture(e)}
+                      style={{ display: 'none' }}
+                      {...register("contactInfo.profilePicture")}
+                    />
+                  </div>
                 </div>
+
               </div>
 
             </div>
@@ -288,9 +323,9 @@ export const AddEmployee = () => {
                       label="Salário"
                       placeholder="Salário"
                       variant="filled"
-                      {...register("employeeInfo.salary", { required: true, valueAsNumber: true })}
+                      {...register("employeeInfo.salary", { required: true, valueAsNumber: true, min: 1 })}
                     />
-                    {errors.employeeInfo?.salary && <span className='text-red-500 text-xs'>Salário é obrigatório</span>}
+                    {errors.employeeInfo?.salary && <span className='text-red-500 text-xs'>Salário incorreto ou não preenchido</span>}
                   </div>
                 </div>
                 <p className='text-xs text-gray-500'>ex: Desenvolvedor</p>
@@ -316,9 +351,9 @@ export const AddEmployee = () => {
                         label="Número"
                         placeholder="Número"
                         variant="filled"
-                        {...register("contactInfo.address.number", { required: true, valueAsNumber: true })}
+                        {...register("contactInfo.address.number", { required: true, valueAsNumber: true, min: 1 })}
                       />
-                      {errors.contactInfo?.address?.number && <span className='text-red-500 text-xs'>Número é obrigatório</span>}
+                      {errors.contactInfo?.address?.number && <span className='text-red-500 text-xs'>Número incorreto ou não preenchido</span>}
                     </div>
 
                     <FormControl variant="filled" sx={{ minWidth: 120 }}>
@@ -333,6 +368,8 @@ export const AddEmployee = () => {
                         ))}
                       </Select>
                     </FormControl>
+                    {errors.address?.uf && <span className='text-red-500 text-xs mt-1'>UF é obrigatório</span>}
+
                   </div>
                 </div>
                 <div className='flex flex-col w-full'>
@@ -359,9 +396,12 @@ export const AddEmployee = () => {
                           label="Telefone"
                           placeholder="Telefone"
                           variant="filled"
-                          {...register("contactInfo.phone", { required: true })}
+                          {...register("contactInfo.phone", {
+                            required: "Telefone é obrigatório",
+                            validate: validatePhoneNumber
+                          })}
                         />
-                        {errors.contactInfo?.phone && <span className='text-red-500 text-xs'>Telefone é obrigatório</span>}
+                        {errors.contactInfo?.phone && <span className='text-red-500 text-xs'>{errors.contactInfo.phone.message}</span>}
                       </div>
                       <div className='flex flex-col w-full'>
                         <TextField
@@ -396,12 +436,25 @@ export const AddEmployee = () => {
                   <div className='w-full flex flex-col'>
                     <div className="flex gap-3">
                       <div className='flex flex-col w-full'>
-                        <input {...register("employeeInfo.admissionDate", { required: true })} type='date' className='input w-full' placeholder='Data de Admissão' />
-                        {errors.employeeInfo?.admissionDate && <span className='text-red-500 text-xs'>Data de Admissão é obrigatório</span>}
+                        <TextField
+                          label="Data de Admissão"
+                          variant="filled"
+                          fullWidth
+                          type="date"
+                          {...register('employeeInfo.admissionDate', { required: true, validate: validateAdmission })}
+                        />
+                        {errors.employeeInfo?.admissionDate && <span className='text-red-500 text-xs'>{errors.employeeInfo.admissionDate.message}</span>}
                       </div>
                       <div className='flex flex-col w-full'>
-                        <input {...register("contactInfo.birthday", { required: true })} type='date' className='input w-full' placeholder='Data de Nascimento' />
-                        {errors.contactInfo?.birthday && <span className='text-red-500 text-xs'>Data de Nascimento é obrigatório</span>}
+                        <TextField
+                          label="Data de Nascimento"
+                          variant="filled"
+                          fullWidth
+                          type="date"
+                          {...register('contactInfo.birthday', { required: true, validate: validateBirthday })}
+                        />
+                        {errors.contactInfo?.birthday && <span className='text-red-500 text-xs'>{errors.contactInfo.birthday.message}</span>}
+
                       </div>
                     </div>
                   </div>
@@ -409,13 +462,13 @@ export const AddEmployee = () => {
               </div>
             </div>
 
-            <Button type='submit' variant='contained' sx={{ padding: '12px 24px', borderRadius: '20px', width: '100%'}}>Salvar</Button>
+            <Button type='submit' variant='contained' sx={{ padding: '12px 24px', borderRadius: '20px', width: '100%' }}>Salvar</Button>
           </form>
         </section>
 
         <EmployeePDF employee={employeeData} profilePicture={selectedImage} isRounded={isRounded} />
       </main>
-      {(open && pictureURL != '' && employeePdfUrl != '') && <ModalCreateEmployee employee={employee} createEmployee={addEmployee} handleClose={handleClose} handleOpen={handleOpen} open={open} />} 
+      {(open && pictureURL != '' && employeePdfUrl != '') && <ModalCreateEmployee employee={employee} createEmployee={addEmployee} handleClose={handleClose} handleOpen={handleOpen} open={open} />}
     </div>
   )
 }

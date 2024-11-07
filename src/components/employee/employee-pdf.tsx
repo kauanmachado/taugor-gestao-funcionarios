@@ -13,8 +13,8 @@ export const EmployeePDF = ({ employee, profilePicture, isRounded}: EmployeeProp
         setEmployeeToRender(employee)
     }, [employee])
     return (
-        <section className='bg-gray-100 flex justify-center items-center lg:w-2/3 w-full'>
-            <div className='bg-white a4 shadow-lg rounded-sm p-10 flex flex-col gap-3 w-full h-full'  id='document'>
+        <section className='bg-gray-100 flex justify-center items-center lg:w-2/3 w-full '>
+            <div className='bg-white a4 shadow-lg rounded-sm p-10 flex flex-col gap-3 w-full h-full min-h-[800px]'  id='document'>
                 {/* <div className='without-border-top px-3 pb-5 flex flex-col gap-5'>
                     {profilePicture &&
                         <div className='flex justify-center items-center'>
@@ -35,7 +35,7 @@ export const EmployeePDF = ({ employee, profilePicture, isRounded}: EmployeeProp
                     <p className='text-xs text-gray-500'>Cargo: {employeeToRender?.employeeInfo?.role}</p>
                     <p className='text-xs text-gray-500'>Setor: {employeeToRender?.employeeInfo?.sector}</p>
                     <p className='text-xs text-gray-500'>Data de admissão: {employeeToRender?.employeeInfo?.admissionDate}</p>
-                    <p className='text-xs text-gray-500'>Salário: {employeeToRender?.employeeInfo?.salary}</p>
+                    <p className='text-xs text-gray-500'>Salário: R${employeeToRender?.employeeInfo?.salary}</p>
                 </div>
                 <div className='border border-primaryColor px-3 py-4'>
                     <h1 className='text-baseBlue text-1xl font-bold'>Endereço:</h1>
