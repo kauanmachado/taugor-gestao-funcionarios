@@ -268,7 +268,6 @@ export const AddEmployee = () => {
                     </>
                   )}
 
-                  {/* O botão de upload é sempre visível */}
                   <div className='flex items-center gap-3'>
                     <label htmlFor='upload-photo' className='flex items-center gap-3'>
                       <div className='rounded-full p-1 bg-blue-500 cursor-pointer hover:bg-blue-300 transition-colors'>

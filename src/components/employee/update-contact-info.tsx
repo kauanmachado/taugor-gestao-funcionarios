@@ -13,6 +13,10 @@ import { getStates } from "@brazilian-utils/brazilian-utils"
 import { RiPencilFill } from "react-icons/ri"
 import { v4 } from "uuid"
 import { GoToList } from "../gotolist"
+import { AiOutlineArrowUp } from "react-icons/ai"
+import { BsToggle2Off } from "react-icons/bs"
+import { BiSolidUser } from "react-icons/bi"
+import { FaRegLightbulb } from "react-icons/fa"
 
 type DataProps = {
     employeeId: string
@@ -23,6 +27,7 @@ type FormValues = {
     lastName: string
     email: string
     phone: string
+    profilePicture: string
     gender: string
     address: {
         cep: string
@@ -31,8 +36,6 @@ type FormValues = {
         uf: string
     };
     birthday: string
-    role: string
-    sector: string
 }
 
 export const UpdateContactInfo = ({ employeeId }: DataProps) => {
@@ -40,6 +43,9 @@ export const UpdateContactInfo = ({ employeeId }: DataProps) => {
     const { register, handleSubmit, formState: { errors } } = useForm<FormValues>()
     const [employee, setEmployee] = useState<IEmployee | null>(null)
     const [updatedEmployeeData, setUpdatedEmployeeData] = useState<IEmployee | null>(null)
+    const [selectedImage, setSelectedImage] = useState<string | null>(null)
+    const [pictureURL, setPictureURL] = useState<string>("")
+    const [isRounded, setIsRounded] = useState<boolean>(false)
     const ufs = getStates()
     const navigate = useNavigate()
 
@@ -70,13 +76,46 @@ export const UpdateContactInfo = ({ employeeId }: DataProps) => {
         fetchEmployee()
     }, [employeeId])
 
+    const handleSelectedPicture = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const picture = e.target.files[0]
+            setEmployee((prev: any) => ({
+                ...prev,
+                contactInfo: {
+                    ...prev.contactInfo,
+                    profilePicture: picture,
+                }
+            }));
+
+            if (picture) {
+                const imageUrl = URL.createObjectURL(picture)
+                setSelectedImage(imageUrl);
+            }
+        }
+    };
+
+    const uploadImage = async () => {
+        if (employee?.contactInfo.profilePicture && typeof employee?.contactInfo.profilePicture !== 'string') {
+            const picture: File = employee?.contactInfo.profilePicture
+            const imageRef = ref(storage, `profile-pictures/${picture.name + v4()}`)
+            await uploadBytes(imageRef, picture)
+            const pictureURL = await getDownloadURL(imageRef)
+            return pictureURL;
+        }
+        return ''; // Caso a imagem não seja modificada
+    };
+
+    const handleRounded = () => {
+        setIsRounded(prev => !prev);
+    };
+
     const generatePDF = async (input: HTMLElement): Promise<Blob> => {
-        const pdf = new jsPDF('p', 'mm', 'a4')
+        const pdf = new jsPDF('p', 'mm', 'a4');
         const canvas = await html2canvas(input, { scale: 2 })
         const imgData = canvas.toDataURL('image/jpeg', 1.0)
         pdf.addImage(imgData, 'JPEG', 0, 0, 210, (210 * canvas.height) / canvas.width)
         return pdf.output('blob')
-    }
+    };
 
     const generateAndUploadPdf = async (employee: IEmployee): Promise<string> => {
         const input = document.getElementById('document')
@@ -86,11 +125,15 @@ export const UpdateContactInfo = ({ employeeId }: DataProps) => {
             await uploadBytes(pdfRef, pdfData)
             return getDownloadURL(pdfRef)
         }
-        return ''
-    }
+        return '';
+    };
 
     const handleUpdate: SubmitHandler<FormValues> = async (data) => {
-        if (!employee || !updatedEmployeeData) return
+        if (!employee || !updatedEmployeeData) return;
+
+        const uploadedImageURL = employee?.contactInfo.profilePicture && typeof employee?.contactInfo.profilePicture !== 'string'
+            ? await uploadImage()
+            : updatedEmployeeData.contactInfo.profilePicture 
 
         const updatedData = {
             ...updatedEmployeeData,
@@ -102,6 +145,7 @@ export const UpdateContactInfo = ({ employeeId }: DataProps) => {
                 phone: data.phone,
                 gender: data.gender,
                 birthday: data.birthday,
+                profilePicture: uploadedImageURL, 
                 address: {
                     ...updatedEmployeeData.contactInfo.address,
                     cep: data.address.cep,
@@ -110,7 +154,7 @@ export const UpdateContactInfo = ({ employeeId }: DataProps) => {
                     logradouro: data.address.logradouro
                 }
             }
-        }
+        };
 
         setUpdatedEmployeeData(updatedData)
 
@@ -124,27 +168,21 @@ export const UpdateContactInfo = ({ employeeId }: DataProps) => {
                 throw new Error('Funcionário não encontrado!')
             }
 
-            // Verifica se o campo 'histories' existe e se 'versions' é um array
-            const histories = employeeDocSnap.data()?.histories || {}
-            const currentVersions = Array.isArray(histories?.versions)
-                ? histories.versions
-                : []
+            const histories = employeeDocSnap.data()?.histories || {};
+            const currentVersions = Array.isArray(histories?.versions) ? histories.versions : []
 
-            // Cria a nova versão
             const updatedPdfURL = await generateAndUploadPdf(updatedData)
             const newVersion = {
                 date: formattedDate,
                 pdfPath: updatedPdfURL,
-            }
+            };
 
-            // Mantém as versões antigas e adiciona a nova versão ao final
             const updatedVersions = [...currentVersions, newVersion]
 
-            // Atualiza o documento com o novo campo 'histories.versions'
             await updateDoc(employeeRef, {
                 contactInfo: updatedData.contactInfo,
-                'histories.versions': updatedVersions,  // Atualiza a lista de versões dentro de 'histories'
-            })
+                'histories.versions': updatedVersions,
+            });
 
             alert('Informações de contato atualizadas com sucesso!')
             navigate("/list-employees")
@@ -152,17 +190,15 @@ export const UpdateContactInfo = ({ employeeId }: DataProps) => {
             console.error('Erro ao atualizar informações do funcionário:', error)
             alert('Erro ao atualizar informações do funcionário. Tente novamente.')
         }
-    }
-
-
+    };
 
     const validatePhoneNumber = (phone: string) => {
         const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/
         return phoneRegex.test(phone) || "Formato de telefone inválido ou não preenchido"
-    }
+    };
 
     const validateBirthday = (birthday: string) => {
-        const today = new Date()
+        const today = new Date();
         const birthdayDate = new Date(birthday)
 
         if (isNaN(birthdayDate.getTime())) {
@@ -173,8 +209,8 @@ export const UpdateContactInfo = ({ employeeId }: DataProps) => {
             return "Data de nascimento não pode ser posterior à data atual"
         }
 
-        return true
-    }
+        return true;
+    };
 
     return (
         <>
@@ -187,6 +223,45 @@ export const UpdateContactInfo = ({ employeeId }: DataProps) => {
                 <p className="text-sm text-gray-600 mb-8">Atualize as informações de contato do funcionário</p>
 
                 <form onSubmit={handleSubmit(handleUpdate)} className="space-y-4">
+                    <div className={`${selectedImage ? '' : 'px-5 py-10 bg-gray-50'} h-full flex justify-center items-center  rounded-md`}>
+                        {selectedImage ? (
+                            <div className='flex flex-col gap-3'>
+                                <img src={selectedImage} alt="Selected" className={`h-40 w-40 object-cover h-[100px] w-[100px] ${isRounded ? 'rounded-full' : ''}`} />
+                                <div className='flex items-center gap-3'>
+                                    {isRounded ? <BsToggle2Off onClick={handleRounded} className="text-3xl text-primaryColor cursor-pointer rotate-180" /> : <BsToggle2Off onClick={handleRounded} className="text-3xl text-gray-400 cursor-pointer" />}
+                                    <p className="text-sm">Foto Redonda</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <BiSolidUser className="text-gray-300 text-6xl" />
+                        )}
+                    </div>
+                    {selectedImage ? (<></>) : (
+                        <>
+                            <div className='flex items-center gap-3 mb-3'>
+                                <p className="">Foto do Perfil</p>
+                                <div className='rounded-full p-1 bg-gray-200'>
+                                    <FaRegLightbulb className="text-gray-400" />
+                                </div>
+                            </div>
+                        </>
+                    )}
+                    <div className='flex items-center gap-3'>
+                        <label htmlFor='upload-photo' className='flex items-center gap-3'>
+                            <div className='rounded-full p-1 bg-blue-500 cursor-pointer hover:bg-blue-300 transition-colors'>
+                                <AiOutlineArrowUp className='text-white ' />
+                            </div>
+                        </label>
+                        <p className='text-sm'>Adicionar Foto</p>
+                        <input
+                            type='file'
+                            id='upload-photo'
+                            // @ts-ignore
+                            onChangeCapture={(e) => handleSelectedPicture(e)}
+                            style={{ display: 'none' }}
+                            {...register("profilePicture")}
+                        />
+                    </div>
                     <div className="flex flex-col md:flex-row gap-4">
 
                         <div className="flex flex-col w-full">
@@ -212,6 +287,7 @@ export const UpdateContactInfo = ({ employeeId }: DataProps) => {
                             {errors.lastName && <span className='text-red-500 text-xs mt-1'>Sobrenome é obrigatório</span>}
                             <p className='text-xs text-gray-500'>ex: Machado</p>
                         </div>
+
 
                     </div>
 
